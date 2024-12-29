@@ -3,7 +3,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputUsd = document.querySelector("#usd");
   const convertBtn = document.querySelector("#convert");
 
-  convertBtn.addEventListener("click", () => {
+  window.addEventListener("keydown", (event) => {
+    switch (event.key) {
+      case "Backspace":
+        inputPln.value = inputPln.value.slice(0, -1);
+        break;
+      case "Enter":
+        convertation();
+        break;
+      case "Escape":
+        inputPln.value = "";
+        inputUsd.value = "";
+        break;
+      default:
+        if (!isNaN(event.key)) {
+          inputPln.value += event.key;
+        }
+        break;
+    }
+  });
+
+  convertBtn.addEventListener("click", convertation);
+
+  function convertation() {
     const request = new XMLHttpRequest();
 
     request.open("GET", "js/current.json");
@@ -29,5 +51,5 @@ document.addEventListener("DOMContentLoaded", () => {
         inputUsd.value = "Ошибка сервера";
       }
     });
-  });
+  }
 });
