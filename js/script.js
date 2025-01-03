@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const convertBtn = document.querySelector("#convert");
 
   window.addEventListener("keydown", (event) => {
+    event.preventDefault();
+
     switch (event.key) {
       case "Backspace":
         inputPln.value = inputPln.value.slice(0, -1);
@@ -26,30 +28,28 @@ document.addEventListener("DOMContentLoaded", () => {
   convertBtn.addEventListener("click", convertation);
 
   function convertation() {
-    const request = new XMLHttpRequest();
+    inputUsd.value = "Загрузка...";
 
-    request.open("GET", "js/current.json");
-    request.setRequestHeader("Content-Type", "application/json");
-    request.send();
-
-    request.addEventListener("load", () => {
-      if (request.status === 200) {
-        try {
-          const data = JSON.parse(request.response);
-          const usdRate = data.current.usd;
-
-          const plnValue = parseFloat(inputPln.value);
-          if (isNaN(plnValue)) {
-            inputUsd.value = "Введите корректное число";
-          } else {
-            inputUsd.value = (plnValue / usdRate).toFixed(2);
-          }
-        } catch (error) {
-          inputUsd.value = "Ошибка обработки данных";
+    fetch("../js/current.json")
+      .then((response) => {
+        if (!response.ok) {
+          console.log(`Ошибка: ${response.status}`);
+          throw new Error(`Ошибка: ${response.status}`);
         }
-      } else {
+        return response.json();
+      })
+      .then((data) => {
+        const validCurrent = data.current.usd;
+
+        const plnValue = parseFloat(inputPln.value);
+        if (isNaN(plnValue)) {
+          inputUsd.value = "Введите корректное число";
+        } else {
+          inputUsd.value = (plnValue / validCurrent).toFixed(2);
+        }
+      })
+      .catch(() => {
         inputUsd.value = "Ошибка сервера";
-      }
-    });
+      });
   }
 });
