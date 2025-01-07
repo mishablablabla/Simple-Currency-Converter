@@ -27,29 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   convertBtn.addEventListener("click", convertation);
 
-  function convertation() {
+  async function convertation() {
     inputUsd.value = "Загрузка...";
 
-    fetch("../js/current.json")
-      .then((response) => {
-        if (!response.ok) {
-          console.log(`Ошибка: ${response.status}`);
-          throw new Error(`Ошибка: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const validCurrent = data.current.usd;
+    try {
+      const response = await fetch("../js/current.json");
 
-        const plnValue = parseFloat(inputPln.value);
-        if (isNaN(plnValue)) {
-          inputUsd.value = "Введите корректное число";
-        } else {
-          inputUsd.value = (plnValue / validCurrent).toFixed(2);
-        }
-      })
-      .catch(() => {
-        inputUsd.value = "Ошибка сервера";
-      });
+      if (!response.ok) {
+        console.log(`Ошибка: ${response.status}`);
+        throw new Error(`Ошибка: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const validCurrent = data.current.usd;
+
+      const plnValue = parseFloat(inputPln.value);
+      if (isNaN(plnValue)) {
+        inputUsd.value = "Введите корректное число";
+      } else {
+        inputUsd.value = (plnValue / validCurrent).toFixed(2);
+      }
+    } catch (error) {
+      console.error(error);
+      inputUsd.value = "Ошибка сервера";
+    }
   }
 });
